@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Looper PRO - Alta Qualidade</title>
+<style>
+  :root{--green:#1DB954;--red:#ff3b30;--bg:#0a0a0a}
+  body{font-family:system-ui,sans-serif;background:var(--bg);color:#fff;margin:0;padding:12px;text-align:center}
+  h1{color:var(--green);margin:8px 0 2px} #status{color:#aaa;font-size:14px;min-height:20px}
+.tabs{display:flex;gap:8px;max-width:440px;margin:10px auto}
+.tab{flex:1;padding:16px;border-radius:12px;border:2px solid #222;background:#111;color:#888;font-weight:800;font-size:16px}
+.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+.screen{display:none;max-width:440px;margin:0 auto}.screen.active{display:block}
+.card{background:#161616;border:2px solid #222;border-radius:18px;padding:14px;margin:10px 0;text-align:left}
+.card:focus-within{border-color:var(--green)}
+  button{width:100%;padding:20px;font-size:18px;border:none;border-radius:14px;font-weight:800;margin:6px 0;cursor:pointer}
+  button:focus{outline:3px solid #fff;outline-offset:3px}
+  #recBase{background:var(--green);color:#fff} #overdub{background:var(--red);color:#fff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row button{background:#2a2a2a;color:#fff}
+  #visual{height:80px;background:#000;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;border:3px solid #1a1a1a;margin:10px 0}
+.recording{border-color:var(--red)!important;animation:pulse 1s infinite} @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,59,48,.7)}70%{box-shadow:0 0 0 18px rgba(255,59,48,0)}100%{box-shadow:0 0 0 0 rgba(255,59,48,0)}}
+  #tunerNota{font-size:72px;font-weight:900;line-height:1} #tunerFreq{font-size:14px;color:#888} #tunerStatus{font-size:22px;font-weight:800}
+.afinado{color:var(--green)!important}.abaixo{color:#ffcc00!important}.acima{color:var(--red)!important}
+.mode{padding:12px;border-radius:12px;border:2px solid #333;margin:6px 0;cursor:pointer;font-size:14px}
+.mode.on{border-color:var(--green);background:#132a18}
+.sr-only{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+</style>
+</head>
+<body>
+<h1>🎸 LOOPER PRO</h1>
+<div id="status" role="status" aria-live="polite">Pronto - Qualidade estúdio 48kHz</div>
+<div id="visual" role="status" aria-live="assertive">♫</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" id="tabLooper" role="tab" aria-selected="true" onclick="show('looper')" aria-label="Tela do Looper, atalho 1">LOOPER [1]</button>
+  <button class="tab" id="tabTools" role="tab" aria-selected="false" onclick="show('tools')" aria-label="Tela do Afinador, atalho 2">AFINADOR [2]</button>
+</div>
+
+<div id="s-looper" class="screen active" role="tabpanel">
+  <div class="card">
+    <div style="font-size:12px;color:#888;margin-bottom:6px">QUALIDADE MÁXIMA - SEM FILTROS</div>
+    <div id="modeFone" class="mode on" role="button" tabindex="0" aria-pressed="true" onclick="setMode('fone')" onkeydown="if(event.key==='Enter')setMode('fone')">🎧 COM FONE - Gravação 100% limpa, sem mistura. Toque em Enter para ativar.</div>
+    <div id="modeSem" class="mode" role="button" tabindex="0" aria-pressed="false" onclick="setMode('sem')" onkeydown="if(event.key==='Enter')setMode('sem')">🔊 SEM FONE - Pausa base automaticamente pra não vazar</div>
+  </div>
+  <div class="card">
+    <button id="recBase" aria-label="Gravar base do violão, atalho R">● GRAVAR BASE [R]</button>
+    <button id="overdub" disabled aria-label="Gravar solo por cima, use fone para ficar limpo, atalho O">● GRAVAR SOLO POR CIMA [O]</button>
+    <div class="row"><button id="stop" disabled aria-label="Parar reprodução, atalho Espaço">■ PARAR [Espaço]</button><button id="export" disabled aria-label="Salvar mix em WAV de alta qualidade">⬇ SALVAR WAV</button></div>
+    <div class="row"><button id="share" disabled aria-label="Compartilhar no WhatsApp">📤 WHATSAPP</button><button id="clear" style="background:#222;color:#777" aria-label="Limpar tudo">LIMPAR</button></div>
+    <div id="tracks" role="list" aria-label="Camadas gravadas" style="margin-top:8px;color:#aaa;font-size:14px">Nenhuma camada - Use fone para melhor qualidade</div>
+  </div>
+</div>
+
+<div id="s-tools" class="screen" role="tabpanel">
+  <div class="card">
+    <div id="tunerBox" style="text-align:center;background:#000;border-radius:14px;padding:16px">
+      <div id="tunerNota" aria-hidden="true">--</div><div id="tunerFreq">Toque em ATIVAR</div><div id="tunerStatus" aria-live="assertive">Desligado</div>
+      <div style="margin-top:8px;height:12px;background:#222;border-radius:6px;overflow:hidden"><div id="centsBar" style="width:50%;height:100%;background:#555;transition:.2s"></div></div>
+    </div>
+    <button id="tunerBtn" style="background:#fff;color:#000;margin-top:10px" aria-label="Ativar afinador acessível">🎤 ATIVAR AFINADOR</button>
+    <div class="row"><button id="voiceBtn" style="font-size:13px;background:#2a2a2a" aria-label="Alternar voz do afinador">🔊 VOZ: FALA POUCO</button><button id="beepBtn" style="font-size:13px;background:#2a2a2a">🔔 BIP LIGADO</button></div>
+  </div>
+</div>
+
+<div id="announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+function show(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false')});document.getElementById('s-'+n).classList.add('active');document.getElementById('tab'+(n=='looper'?'Looper':'Tools')).classList.add('active');document.getElementById('tab'+(n=='looper'?'Looper':'Tools')).setAttribute('aria-selected','true');announce(n=='looper'?'Tela Looper, qualidade estúdio':'Tela Afinador')}
+
+let ctx, baseBuf=null, overdubs=[], isRec=false, rec, chunks=[], sources=[], mode='fone';
+function announce(t){document.getElementById('status').textContent=t;document.getElementById('announcer').textContent=t}
+function setMode(m){mode=m;document.getElementById('modeFone').classList.toggle('on',m=='fone');document.getElementById('modeSem').classList.toggle('on',m=='sem');document.getElementById('modeFone').setAttribute('aria-pressed',m=='fone');document.getElementById('modeSem').setAttribute('aria-pressed',m=='sem');announce('Modo '+ (m=='fone'?'com fone, gravação limpa':'sem fone, base pausa'))}
+async function getCtx(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:48000});if(ctx.state=='suspended')await ctx.resume();return ctx}
+
+function playAll(){sources.forEach(s=>{try{s.stop()}catch{}});sources=[];let all=baseBuf?[baseBuf,...overdubs.map(o=>o.buf)]:overdubs.map(o=>o.buf);if(!all.length)return;all.forEach(b=>{let s=ctx.createBufferSource();s.buffer=b;s.loop=true;s.connect(ctx.destination);s.start();sources.push(s)})}
+function stopAll(){sources.forEach(s=>{try{s.stop()}catch{}});sources=[]}
+let visual=document.getElementById('visual');
+
+// QUALIDADE MÁXIMA - SEM FILTRO QUE ABAFARIA O VIOLÃO
+async function recordClean(){
+  let c=await getCtx();
+  let stream=await navigator.mediaDevices.getUserMedia({audio:{
+    echoCancellation:false,
+    noiseSuppression:false,
+    autoGainControl:false,
+    channelCount:1,
+    sampleRate:48000
+  }});
+  chunks=[];rec=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm'});
+  rec.ondataavailable=e=>chunks.push(e.data);
+  return new Promise(res=>{rec.onstop=async()=>{let blob=new Blob(chunks,{type:'audio/webm'});let ab=await blob.arrayBuffer();let buf=await c.decodeAudioData(ab);res(buf);stream.getTracks().forEach(t=>t.stop())};rec.start(100)});
+}
+
+document.getElementById('recBase').onclick=async function(){
+  if(isRec){rec.stop();isRec=false;this.textContent='● GRAVAR BASE [R]';visual.classList.remove('recording');return}
+  await getCtx();stopAll();isRec=true;this.textContent='■ PARAR - GRAVANDO';visual.textContent='🔴 GRAVANDO BASE EM 48kHz';visual.classList.add('recording');announce('Gravando base em alta qualidade, toque o violão');if(navigator.vibrate)navigator.vibrate(50);
+  let buf=await recordClean();isRec=false;visual.classList.remove('recording');visual.textContent='♫ Loopando em alta';this.textContent='● NOVA BASE';
+  if(buf){baseBuf=buf;render();playAll();announce('Base gravada '+buf.duration.toFixed(1)+' segundos, qualidade estúdio');if(navigator.vibrate)navigator.vibrate([100,50,100])}
+};
+document.getElementById('overdub').onclick=async function(){
+  if(isRec){rec.stop();isRec=false;this.textContent='● GRAVAR SOLO POR CIMA [O]';visual.classList.remove('recording');return}
+  await getCtx();
+  if(mode=='fone'){announce('Base tocando só no fone, gravando solo 100 por cento limpo');playAll();}
+  else{announce('Base pausada pra não misturar som');stopAll();visual.textContent='🎧 TOQUE O SOLO - BASE PAUSADA';}
+  isRec=true;this.textContent='■ PARAR SOLO';visual.classList.add('recording');if(navigator.vibrate)navigator.vibrate(50);
+  let buf=await recordClean();
+  isRec=false;visual.classList.remove('recording');this.textContent='● GRAVAR SOLO POR CIMA [O]';
+  if(buf){overdubs.push({buf,name:'Solo '+(overdubs.length+1)});render();playAll();visual.textContent='♫ Loopando';announce('Solo '+(overdubs.length)+' gravado limpo, sem ruído da base');if(navigator.vibrate)navigator.vibrate([100,50,100])}
+};
+function render(){let el=document.getElementById('tracks');if(!baseBuf&&!overdubs.length){el.innerHTML='Nenhuma camada - grave a base com fone para qualidade máxima';document.getElementById('overdub').disabled=true;document.getElementById('export').disabled=true;document.getElementById('share').disabled=true;document.getElementById('stop').disabled=true;return}document.getElementById('overdub').disabled=false;document.getElementById('export').disabled=false;document.getElementById('share').disabled=false;document.getElementById('stop').disabled=false;let h='';if(baseBuf)h+=`<div role="listitem" style="background:#222;padding:10px;border-radius:8px;margin:4px 0">🟢 Base ${baseBuf.duration.toFixed(1)}s - Alta qualidade</div>`;overdubs.forEach((o,i)=>h+=`<div role="listitem" style="background:#222;padding:10px;border-radius:8px;margin:4px 0;display:flex;justify-content:space-between"><span>🔴 ${o.name} ${o.buf.duration.toFixed(1)}s</span><span role="button" tabindex="0" onclick="overdubs.splice(${i},1);render();playAll();announce('Solo removido')" style="color:#ff3b30;padding:4px 10px">✕ Remover</span></div>`);el.innerHTML=h}
+document.getElementById('stop').onclick=()=>{stopAll();announce('Parado');visual.textContent='⏹ Parado'};
+document.getElementById('clear').onclick=()=>{stopAll();baseBuf=null;overdubs=[];render();announce('Tudo limpo');visual.textContent='♫'};
+
+// EXPORTAR WAV DE VERDADE + COMPARTILHAR
+function bufferToWavBlob(buffer){
+  const numChan=buffer.numberOfChannels, len=buffer.length*numChan*2+44; const ab=new ArrayBuffer(len); const v=new DataView(ab);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF'); v.setUint32(4,len-8,true); ws(8,'WAVE'); ws(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,numChan,true); v.setUint32(24,buffer.sampleRate,true); v.setUint32(28,buffer.sampleRate*numChan*2,true); v.setUint16(32,numChan*2,true); v.setUint16(34,16,true); ws(36,'data'); v.setUint32(40,len-44,true);
+  let off=44; for(let i=0;i<buffer.length;i++) for(let ch=0;ch<numChan;ch++){ let s=Math.max(-1,Math.min(1,buffer.getChannelData(ch)[i])); v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true); off+=2; }
+  return new Blob([v],{type:'audio/wav'});
+}
+async function getMix(){
+  await getCtx(); let all=baseBuf?[baseBuf,...overdubs.map(o=>o.buf)]:overdubs.map(o=>o.buf); if(!all.length) return null;
+  let max=Math.max(...all.map(b=>b.length)); let off=new OfflineAudioContext(2,max,ctx.sampleRate);
+  all.forEach(b=>{ let s=off.createBufferSource(); s.buffer=b; s.connect(off.destination); s.start(); });
+  return await off.startRendering();
+}
+document.getElementById('export').onclick=async()=>{announce('Gerando WAV em alta qualidade'); let mix=await getMix(); if(!mix)return; let blob=bufferToWavBlob(mix); let url=URL.createObjectURL(blob); let a=document.createElement('a'); a.href=url; a.download='meu-loop-48kHz-'+Date.now()+'.wav'; a.click(); announce('WAV salvo em 48kHz');};
+document.getElementById('share').onclick=async()=>{ let mix=await getMix(); if(!mix)return; let blob=bufferToWavBlob(mix); let file=new File([blob],'loop-48kHz.wav',{type:'audio/wav'}); if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:'Meu loop'}); announce('Compartilhado no WhatsApp'); } else { document.getElementById('export').click(); }};
+
+// ACESSIBILIDADE TECLADO CORRIGIDA
+document.addEventListener('keydown', e=>{
+  if(e.key.toLowerCase()=='r') document.getElementById('recBase').click();
+  if(e.key.toLowerCase()=='o') {let b=document.getElementById('overdub'); if(!b.disabled) b.click();}
+  if(e.key === ' ' || e.key === 'Space') {e.preventDefault(); document.getElementById('stop').click();}
+  if(e.key=='1') show('looper');
+  if(e.key=='2') show('tools');
+});
+
+// AFINADOR
+let tunerOn=false, voiceOn=true, beepOn=true, analyser, raf, streamMic=null;
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'], PT={'C':'Dó','C#':'Dó sustenido','D':'Ré','D#':'Ré sustenido','E':'Mi','F':'Fá','F#':'Fá sustenido','G':'Sol','G#':'Sol sustenido','A':'Lá','A#':'Lá sustenido','B':'Si'};
+function freqToNote(f){let n=12*(Math.log(f/440)/Math.log(2)), nn=Math.round(n)+69, note=NOTES[nn%12], exact=440*Math.pow(2,(nn-69)/12), cents=Math.floor(1200*Math.log(f/exact)/Math.log(2));return{note,exact,cents}}
+function autoCorrelate(buf,sr){let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);if(rms<0.02)return-1;let c=new Array(buf.length).fill(0);for(let i=0;i<buf.length;i++)for(let j=0;j<buf.length-i;j++)c[i]+=buf[j]*buf[j+i];let d=0;while(d<c.length-1&&c[d]>c[d+1])d++;let maxV=-1,maxP=d;for(let i=d;i<c.length;i++)if(c[i]>maxV){maxV=c[i];maxP=i}return maxP?sr/maxP:-1}
+let lastFreq=0, stableCount=0, lastSpeak=0;
+document.getElementById('tunerBtn').onclick=toggleTuner;
+document.getElementById('voiceBtn').onclick=function(){voiceOn=!voiceOn;this.textContent=voiceOn?'🔊 VOZ: FALA POUCO':'🔇 VOZ DESLIGADA';announce(voiceOn?'Voz ligada':'Voz desligada')};
+document.getElementById('beepBtn').onclick=function(){beepOn=!beepOn;this.textContent=beepOn?'🔔 BIP LIGADO':'🔕 BIP DESLIGADO'};
+async function toggleTuner(){
+  let btn=document.getElementById('tunerBtn');
+  if(tunerOn){tunerOn=false;cancelAnimationFrame(raf);if(streamMic)streamMic.getTracks().forEach(t=>t.stop());btn.textContent='🎤 ATIVAR AFINADOR';document.getElementById('tunerStatus').textContent='Desligado';announce('Afinador desligado');return}
+  await getCtx();
+  streamMic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,autoGainControl:false,noiseSuppression:false}});
+  let src=ctx.createMediaStreamSource(streamMic);analyser=ctx.createAnalyser();analyser.fftSize=4096;src.connect(analyser);
+  tunerOn=true;btn.textContent='⏹ DESATIVAR';announce('Afinador ligado, toque uma corda e segure');
+  let buf=new Float32Array(4096);
+  (function loop(){
+    if(!tunerOn)return;analyser.getFloatTimeDomainData(buf);let freq=autoCorrelate(buf,ctx.sampleRate);
+    if(freq>60&&freq<500){
+      if(Math.abs(freq-lastFreq)<2) stableCount++; else stableCount=0;
+      lastFreq=freq;
+      if(stableCount>4){
+        let {note,exact,cents}=freqToNote(freq);
+        document.getElementById('tunerNota').textContent=note;
+        document.getElementById('tunerFreq').textContent=freq.toFixed(1)+' Hz - '+PT[note];
+        let st=document.getElementById('tunerStatus'), bar=document.getElementById('centsBar');
+        let pos=50+cents; pos=Math.max(5,Math.min(95,pos)); bar.style.width=pos+'%';
+        if(Math.abs(cents)<8){st.textContent='AFINADO!';st.className='afinado';bar.style.background='var(--green)'; if(beepOn&&Date.now()-lastSpeak>2000){let o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=880;o.connect(g);g.connect(ctx.destination);g.gain.value=0.2;o.start();o.stop(ctx.currentTime+0.2); if(navigator.vibrate) navigator.vibrate(300)} if(voiceOn&&Date.now()-lastSpeak>2500){speechSynthesis.speak(new SpeechSynthesisUtterance(PT[note]+' afinado')); lastSpeak=Date.now()} }
+        else if(cents<0){st.textContent=cents+' abaixo';st.className='abaixo';bar.style.background='#ffcc00'; if(voiceOn&&Date.now()-lastSpeak>2500){speechSynthesis.speak(new SpeechSynthesisUtterance(PT[note]+' '+Math.abs(cents)+' abaixo')); lastSpeak=Date.now()} }
+        else{st.textContent='+'+cents+' acima';st.className='acima';bar.style.background='var(--red)'; if(voiceOn&&Date.now()-lastSpeak>2500){speechSynthesis.speak(new SpeechSynthesisUtterance(PT[note]+' '+cents+' acima')); lastSpeak=Date.now()} }
+      }
+    } else {
+      stableCount=0;
+      document.getElementById('tunerStatus').textContent='Toque a corda...'; document.getElementById('tunerStatus').className='';
+    }
+    raf=requestAnimationFrame(loop);
+  })();
+}
+</script>
+</body>
+</html>
